@@ -154,33 +154,6 @@ The client downloads `temp_audio.mp3` then plays it.
 
 ---
 
-## 🔍 Code Walkthrough (Interview-Oriented)
-
-### UDP
-- **Server:**
-  - `socket.socket(AF_INET, SOCK_DGRAM)` → `bind()` → `recvfrom()` song request → `sendto()` file chunks.
-- **Client:**
-  - Sends song name via `sendto()`.
-  - Reassembles received datagrams until a short (< chunk size) read is seen.
-  - Plays with `pygame`.
-
-**Trade-offs:** No retransmissions, no ordering guarantee. Simple but can cause audible glitches on loss.
-
-### TCP + TLS
-- **Server:**
-  - `socket(AF_INET, SOCK_STREAM)` → `bind()` → `listen()` → `accept()`.
-  - Wraps `conn` with TLS (`ssl.wrap_socket` in sample; prefer `SSLContext` in production).
-  - Spawns a thread `handle_client()` per connection.
-  - Streams bytes with `sendall()`.
-
-- **Client:**
-  - Creates TCP socket → wraps with TLS (`SSLContext(...).wrap_socket()`).
-  - Sends song name → receives stream → writes to file → `pygame.mixer.music.play()`.
-
-**Trade-offs:** More overhead but reliable and secure. Threading scales better to multiple clients.
-
----
-
 ## 🆚 UDP vs TCP (TLS) — Side-by-Side
 
 | Feature            | UDP (Datagrams)                            | TCP + TLS (Streams)                                   |
@@ -201,7 +174,6 @@ The client downloads `temp_audio.mp3` then plays it.
   - Use a trusted CA or ship your own CA bundle.
   - Enable hostname verification and `CERT_REQUIRED`.
 - Protect `key.pem` properly (file permissions).
-- Consider **DTLS** if you need UDP + encryption + integrity.
 
 ---
 
